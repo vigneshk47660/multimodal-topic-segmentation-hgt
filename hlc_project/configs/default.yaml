@@ -1,0 +1,70 @@
+model:
+  shared_dim: 256
+  hgt_hidden_dim: 256
+  hgt_num_heads: 8
+  hgt_num_layers: 3
+  hgt_dropout: 0.1
+  num_modalities: 4
+  modality_types: ["text", "equation", "table", "diagram"]
+
+encoders:
+  text:
+    model_name: "sentence-transformers/all-MiniLM-L6-v2"
+    output_dim: 384
+  equation:
+    model_name: "tbs17/MathBERT"
+    output_dim: 768
+  table:
+    model_name: "google/tapas-base"
+    output_dim: 768
+  diagram:
+    model_name: "google/vit-base-patch16-224"
+    output_dim: 768
+
+graph:
+  temporal_window: 1
+  cross_modal_similarity_threshold: 0.5
+  edge_types: ["temporal_next", "temporal_prev", "cross_modal"]
+
+change_point:
+  method: "neural"
+  penalty: 1.0
+  min_segment_length: 3
+  kernel: "rbf"
+
+faiss:
+  merge_threshold: 0.85
+  nlist: 10
+  nprobe: 5
+
+training:
+  batch_size: 1
+  learning_rate: 0.0001
+  weight_decay: 0.00001
+  epochs: 50
+  patience: 10
+  warmup_steps: 100
+  gradient_clip: 1.0
+
+evaluation:
+  window_size: 5
+  metrics: ["pk", "windowdiff", "boundary_f1", "boundary_precision", "boundary_recall"]
+
+synthetic_dataset:
+  num_lectures: 100
+  min_units_per_lecture: 30
+  max_units_per_lecture: 80
+  min_topics_per_lecture: 3
+  max_topics_per_lecture: 8
+  modality_distribution:
+    text: 0.50
+    equation: 0.20
+    table: 0.15
+    diagram: 0.15
+  noise_ratio: 0.05
+
+paths:
+  data_dir: "./data"
+  output_dir: "./outputs"
+  checkpoint_dir: "./checkpoints"
+  log_dir: "./logs"
